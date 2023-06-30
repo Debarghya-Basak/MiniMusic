@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.minimusic'
+    namespace 'com.example.musicplayz'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.minimusic"
+        applicationId "com.example.musicplayz"
         minSdk 24
         targetSdk 33
         versionCode 1

@@ -1,4 +1,4 @@
-package com.example.minimusic;
+package com.example.musicplayz;
 import static android.graphics.Color.argb;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -6,18 +6,14 @@ import androidx.appcompat.widget.AppCompatDrawableManager;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;

@@ -1,4 +1,4 @@
-package com.example.minimusic;
+package com.example.musicplayz;
 
 import android.content.Context;
 import android.content.Intent;

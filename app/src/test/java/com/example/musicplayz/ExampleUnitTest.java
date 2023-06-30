@@ -1,4 +1,4 @@
-package com.example.minimusic;
+package com.example.musicplayz;
 
 import org.junit.Test;
 

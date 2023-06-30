@@ -1,4 +1,4 @@
-package com.example.minimusic;
+package com.example.musicplayz;
 
 import static com.google.android.material.internal.ContextUtils.getActivity;
 
