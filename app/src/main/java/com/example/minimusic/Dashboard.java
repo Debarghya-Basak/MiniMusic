@@ -28,6 +28,8 @@ public class Dashboard extends AppCompatActivity {
 
     RecyclerView musicItemRecyclerView;
     static ArrayList<String> musicList = new ArrayList<>();
+    static ArrayList<String> musicName = new ArrayList<>();
+    static int position = -1;
 
     final int REQUEST_CODE = 101;
 
@@ -86,10 +88,12 @@ public class Dashboard extends AppCompatActivity {
 
             if (files != null) {
                 for (int i = 0; i < files.length; ++i){
+                    String fileList = files[i].getAbsolutePath();
                     String fileName = files[i].getName();
-                    if(fileName.endsWith(".mp3")){
-                        musicList.add(fileName);
-                        Log.d("Debug", "Dashboard: files = " + fileName);
+                    if(fileList.endsWith(".mp3")){
+                        musicList.add(fileList);
+                        musicName.add(fileName);
+                        Log.d("Debug", "Dashboard: files = " + fileList);
                     }
                 }
                 updateRecyclerView();
@@ -110,5 +114,13 @@ public class Dashboard extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         musicList = new ArrayList<>();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        musicList = new ArrayList<>();
+        musicName = new ArrayList<>();
+        position = -1;
     }
 }

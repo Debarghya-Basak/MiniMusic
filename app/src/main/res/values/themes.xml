@@ -16,7 +16,7 @@
 
     <style name="FilledPlayButton" parent="Widget.Material3.Button">
         <item name="android:backgroundTint">@color/transparent</item>
-        <item name="android:foreground">@drawable/play_button</item>
+        <item name="android:foreground">@drawable/dashboard_play_button</item>
         <item name="cornerRadius">50dp</item>
         <item name="rippleColor">@color/white</item>
     </style>

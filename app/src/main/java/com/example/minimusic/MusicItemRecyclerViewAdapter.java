@@ -33,11 +33,13 @@ public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItem
     @Override
     public void onBindViewHolder(@NonNull MusicItemRecyclerViewAdapter.MyViewHolder holder, int position) {
 
-        holder.musicName.setText(Dashboard.musicList.get(position));
+        holder.musicName.setText(Dashboard.musicName.get(position));
+//        holder.musicName.setSelected(true);
         holder.playSongButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, Player.class);
+                Dashboard.position = position;
                 context.startActivity(intent);
             }
         });
@@ -46,7 +48,7 @@ public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItem
 
     @Override
     public int getItemCount() {
-        return Dashboard.musicList.size();
+        return Dashboard.musicName.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{

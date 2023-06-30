@@ -27,6 +27,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/playing_music_name"
+
         android:background="@drawable/music_disc"/>
 
     <TextView
@@ -36,7 +37,7 @@
         app:layout_constraintTop_toBottomOf="@+id/music_disc"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/music_seekBar"
+        app:layout_constraintBottom_toTopOf="@id/seekbar_music"
         android:marqueeRepeatLimit= "marquee_forever"
         android:ellipsize="marquee"
         android:scrollHorizontally="true"
@@ -50,7 +51,7 @@
         style="@style/WhiteBoldText40"/>
 
     <SeekBar
-        android:id="@+id/music_seekBar"
+        android:id="@+id/seekbar_music"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,8 +70,8 @@
     <LinearLayout
         android:id="@+id/actionButton_controller_layout"
         android:layout_width="match_parent"
-        android:layout_height="50sp"
-        app:layout_constraintTop_toBottomOf="@id/music_seekBar"
+        android:layout_height="100sp"
+        app:layout_constraintTop_toBottomOf="@id/seekbar_music"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -78,26 +79,35 @@
         android:layout_margin="50dp">
 
         <ImageButton
+            android:id="@+id/prevButton_music"
             android:layout_width="50sp"
             android:layout_height="50sp"
-            android:layout_gravity="right"
+            android:layout_gravity="right|center_vertical"
             android:scaleX="-1"
             android:layout_marginEnd="20sp"
+
+            android:onClick="changeToPrevMusic"
 
             android:backgroundTint="@color/whiteTrasparent50"
             android:background="@drawable/next_music"/>
         <ImageButton
-            android:layout_width="50sp"
-            android:layout_height="50sp"
+            android:id="@+id/playButton_music"
+            android:layout_width="100sp"
+            android:layout_height="100sp"
             android:layout_gravity="center"
-            android:backgroundTint="@color/whiteTrasparent50"
+            android:backgroundTint="@color/transparent"
 
-            android:background="@drawable/play_button"/>
+            android:onClick="playPauseMusic"
+
+/>
         <ImageButton
+            android:id="@+id/nextButton_music"
             android:layout_width="50sp"
             android:layout_height="50sp"
-            android:layout_gravity="left"
+            android:layout_gravity="left|center_vertical"
             android:layout_marginStart="20sp"
+
+            android:onClick="changeToNextMusic"
 
             android:backgroundTint="@color/whiteTrasparent50"
 

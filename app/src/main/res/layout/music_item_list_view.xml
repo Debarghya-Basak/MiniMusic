@@ -35,11 +35,17 @@
                 android:layout_weight="1"
                 android:layout_gravity="top"
                 android:padding="10dp"
+                android:maxLines="2"
+                android:fadingEdge="horizontal"
 
                 android:text="- - -"
 
                 style="@style/BlackBoldText20"
                 />
+
+<!--            android:marqueeRepeatLimit="marquee_forever"-->
+<!--            android:ellipsize="marquee"-->
+<!--            android:singleLine="false"-->
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/playSong_button"
