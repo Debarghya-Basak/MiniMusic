@@ -122,10 +122,7 @@ public class Player extends AppCompatActivity {
                     currentPosition = mediaPlayer.getCurrentPosition();
                     musicSeekbar.setProgress(currentPosition);
                     musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
-                    try {
-                        sleep(500);
-                    } catch (InterruptedException e) {
-                    }
+                    SystemClock.sleep(500);
                 }
             }
         };
@@ -137,12 +134,14 @@ public class Player extends AppCompatActivity {
 
         threadMusicDisc.start();
         SystemClock.sleep(100);
+        threadMusicDisc.looping = true;
 
         Handler handler = new Handler(threadMusicDisc.looper);
         handler.post(new Runnable() {
             @Override
             public void run() {
                 do{
+
                     //if animate() is looped, it cannot run directly on a simple Thread. It needs a Looper Thread
                     musicDisc.animate().rotationBy(100).setDuration(5000);
                     musicDisc.setHasTransientState(true);
@@ -190,7 +189,9 @@ public class Player extends AppCompatActivity {
         mediaPlayer.start();
         musicPlaying = true;
         updatePlayPauseButtonBg();
-        musicDiscRotateAnimation();
+        if(!threadMusicDisc.looping && musicPlaying)
+            threadStart();
+
     }
 
     public void changeToNextMusic(View v){
@@ -210,7 +211,8 @@ public class Player extends AppCompatActivity {
         mediaPlayer.start();
         musicPlaying = true;
         updatePlayPauseButtonBg();
-        musicDiscRotateAnimation();
+        if(!threadMusicDisc.looping && musicPlaying)
+            threadStart();
     }
 
     public void playPauseMusic(View v){
@@ -224,7 +226,7 @@ public class Player extends AppCompatActivity {
             mediaPlayer.start();
             musicPlaying = true;
             updatePlayPauseButtonBg();
-            musicDiscRotateAnimation();
+            threadStart();
         }
 
     }
@@ -244,9 +246,27 @@ public class Player extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
+
+                Log.d("Debug","Thread stopped");
                 threadMusicDisc.looper.quit();
             }
         },5000);
+
+    }
+
+    public void threadStart(){
+        if(threadMusicDisc.looping){
+            new Handler().postDelayed(new Runnable(){
+                @Override
+                public void run() {
+                    Log.d("Debug","Next Song");
+                    musicDiscRotateAnimation();
+                }
+            },5100);
+        }
+        else{
+            musicDiscRotateAnimation();
+        }
 
     }
 

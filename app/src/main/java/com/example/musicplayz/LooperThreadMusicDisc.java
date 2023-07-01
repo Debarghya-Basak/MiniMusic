@@ -6,6 +6,8 @@ import android.util.Log;
 
 public class LooperThreadMusicDisc extends Thread{
 
+
+    public boolean looping = false;
     public Looper looper;
     public Handler handler;
 
@@ -16,7 +18,8 @@ public class LooperThreadMusicDisc extends Thread{
         handler = new Handler();
         Looper.loop();
 
-        Log.d("Debug","Looper Thread: End of run()");
+        looping = false;
+        Log.d("Debug","Looper Thread: End of run() : " + looping);
     }
 
 }
