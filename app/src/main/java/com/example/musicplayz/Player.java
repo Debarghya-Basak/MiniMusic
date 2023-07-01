@@ -223,6 +223,7 @@ public class Player extends AppCompatActivity {
         musicStartFlag();
         updatePlayPauseButtonBg();
         updateSeekbarUI();
+        mediaPlayerListener();
         if(!threadMusicDisc.looping && musicPlaying)
             threadStart();
     }
@@ -240,10 +241,12 @@ public class Player extends AppCompatActivity {
             Dashboard.position = 0;
 
         Log.d("Debug",Dashboard.musicName.get(Dashboard.position));
+
         updateUIMusic();
         musicStartFlag();
         updatePlayPauseButtonBg();
         updateSeekbarUI();
+        mediaPlayerListener();
         if(!threadMusicDisc.looping && musicPlaying)
             threadStart();
     }
