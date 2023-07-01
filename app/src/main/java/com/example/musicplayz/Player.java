@@ -3,8 +3,11 @@ import static android.graphics.Color.argb;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatDrawableManager;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.res.ColorStateList;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
@@ -14,6 +17,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,11 +30,13 @@ import android.widget.TextView;
 
 public class Player extends AppCompatActivity {
 
-    TextView musicName;
+    TextView musicName, musicProgressTime, musicEndTime;
     ImageView blurBackground, musicDisc;
     MediaPlayer mediaPlayer;
     SeekBar musicSeekbar;
     ImageButton playPauseButton, nextButton, prevButton;
+    Thread updateSeekbar;
+    LooperThreadMusicDisc threadMusicDisc;
 
     boolean musicPlaying;
 
@@ -44,23 +52,109 @@ public class Player extends AppCompatActivity {
         blurBackground = findViewById(R.id.blurBackground);
 
         Log.d("Debug", Dashboard.musicList.get(Dashboard.position));
+
         musicName = findViewById(R.id.playing_music_name);
+        musicProgressTime = findViewById(R.id.music_progressTime);
+        musicEndTime = findViewById(R.id.music_endTime);
         mediaPlayer = MediaPlayer.create(this, Uri.parse(Dashboard.musicList.get(Dashboard.position)));
+        musicSeekbar = findViewById(R.id.seekbar_music);
+        musicSeekbar.setMax(mediaPlayer.getDuration());
         playPauseButton = findViewById(R.id.playButton_music);
         nextButton = findViewById(R.id.nextButton_music);
         prevButton = findViewById(R.id.prevButton_music);
-        musicSeekbar = findViewById(R.id.seekbar_music);
         musicDisc = findViewById(R.id.music_disc);
         musicName.setText(Dashboard.musicName.get(Dashboard.position));
+        musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+        musicEndTime.setText(toMin(mediaPlayer.getDuration()));
         musicName.setSelected(true);
         mediaPlayer.start();
         musicPlaying = true;
+
         updatePlayPauseButtonBg();
-        musicDisc.animate().rotationBy(360f).setDuration(10000);
+
+        blurBackgroundImage();
+        musicDiscRotateAnimation();
+        seekBarFn();
 
         //initialization end
 
-        blurBackgroundImage();
+    }
+
+    public String toMin(long millis){
+        long sec = (millis / 1000) % 60;
+        long min = (millis / 1000) / 60;
+        long hour = (millis / 1000) / (60*60);
+
+        String seconds=sec+"",minutes=min+"",hours=hour+"";
+        if(sec < 10)
+            seconds = "0" + sec;
+        if(min < 10)
+            minutes = "0" + minutes;
+        if(hour < 10)
+            hours = "0" + hour;
+
+        return hours + ":" + minutes + ":" + seconds;
+    }
+
+    public void seekBarFn(){
+        musicSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mediaPlayer.seekTo(seekBar.getProgress());
+            }
+        });
+
+        updateSeekbar = new Thread(){
+            @Override
+            public void run() {
+                int currentPosition = 0;
+
+                while(currentPosition < mediaPlayer.getDuration()){
+                    currentPosition = mediaPlayer.getCurrentPosition();
+                    musicSeekbar.setProgress(currentPosition);
+                    musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        };
+        updateSeekbar.start();
+    }
+
+    public void musicDiscRotateAnimation(){
+        threadMusicDisc = new LooperThreadMusicDisc();
+
+        threadMusicDisc.start();
+        SystemClock.sleep(100);
+
+        Handler handler = new Handler(threadMusicDisc.looper);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                do{
+                    //if animate() is looped, it cannot run directly on a simple Thread. It needs a Looper Thread
+                    musicDisc.animate().rotationBy(100).setDuration(5000);
+                    musicDisc.setHasTransientState(true);
+                    Log.d("Debug","Player : Rotation" + musicDisc.hasTransientState());
+                    SystemClock.sleep(5000);
+                    if(!musicPlaying)
+                        break;
+                }while (mediaPlayer.getCurrentPosition() < mediaPlayer.getDuration());
+                Log.d("Debug","Stop Rotation");
+            }
+        });
+
 
     }
 
@@ -79,7 +173,6 @@ public class Player extends AppCompatActivity {
 
     }
 
-    @SuppressLint("RestrictedApi")
     public void changeToPrevMusic(View v){
         mediaPlayer.stop();
         musicPlaying = false;
@@ -90,14 +183,16 @@ public class Player extends AppCompatActivity {
         musicName.setText(Dashboard.musicName.get(Dashboard.position));
         musicName.setSelected(true);
         mediaPlayer = MediaPlayer.create(this, Uri.parse(Dashboard.musicList.get(Dashboard.position)));
+        musicSeekbar.setMax(mediaPlayer.getDuration());
+        musicSeekbar.setProgress(0);
+        musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+        musicEndTime.setText(toMin(mediaPlayer.getDuration()));
         mediaPlayer.start();
         musicPlaying = true;
         updatePlayPauseButtonBg();
-
-
+        musicDiscRotateAnimation();
     }
 
-    @SuppressLint("RestrictedApi")
     public void changeToNextMusic(View v){
         mediaPlayer.stop();
         musicPlaying = false;
@@ -108,22 +203,28 @@ public class Player extends AppCompatActivity {
         musicName.setText(Dashboard.musicName.get(Dashboard.position));
         musicName.setSelected(true);
         mediaPlayer = MediaPlayer.create(this, Uri.parse(Dashboard.musicList.get(Dashboard.position)));
+        musicSeekbar.setMax(mediaPlayer.getDuration());
+        musicSeekbar.setProgress(0);
+        musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+        musicEndTime.setText(toMin(mediaPlayer.getDuration()));
         mediaPlayer.start();
         musicPlaying = true;
         updatePlayPauseButtonBg();
+        musicDiscRotateAnimation();
     }
 
-    @SuppressLint("RestrictedApi")
     public void playPauseMusic(View v){
         if(musicPlaying) {
             mediaPlayer.pause();
             musicPlaying = false;
             updatePlayPauseButtonBg();
+            threadQuit();
         }
         else {
             mediaPlayer.start();
             musicPlaying = true;
             updatePlayPauseButtonBg();
+            musicDiscRotateAnimation();
         }
 
     }
@@ -138,7 +239,17 @@ public class Player extends AppCompatActivity {
 
     }
 
-    @SuppressLint("RestrictedApi")
+    public void threadQuit(){
+
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run() {
+                threadMusicDisc.looper.quit();
+            }
+        },5000);
+
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -146,5 +257,7 @@ public class Player extends AppCompatActivity {
         mediaPlayer.stop();
         musicPlaying = false;
         updatePlayPauseButtonBg();
+        threadQuit();
+
     }
 }
