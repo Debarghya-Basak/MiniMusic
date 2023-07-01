@@ -110,12 +110,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:gravity="center"
-        android:layout_margin="50dp">
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp">
+        <ImageButton
+            android:id="@+id/shuffleMode_music"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="20sp"
+
+            android:onClick="changeShuffleMode"
+
+            android:backgroundTint="@color/whiteTrasparent50"
+            android:background="@drawable/shuffle_off"/>
 
         <ImageButton
             android:id="@+id/prevButton_music"
-            android:layout_width="50sp"
-            android:layout_height="50sp"
+            android:layout_width="40sp"
+            android:layout_height="40sp"
             android:layout_gravity="right|center_vertical"
             android:scaleX="-1"
             android:layout_marginEnd="20sp"
@@ -126,8 +138,8 @@
             android:background="@drawable/next_music"/>
         <ImageButton
             android:id="@+id/playButton_music"
-            android:layout_width="100sp"
-            android:layout_height="100sp"
+            android:layout_width="70sp"
+            android:layout_height="70sp"
             android:layout_gravity="center"
             android:backgroundTint="@color/transparent"
 
@@ -136,8 +148,8 @@
 />
         <ImageButton
             android:id="@+id/nextButton_music"
-            android:layout_width="50sp"
-            android:layout_height="50sp"
+            android:layout_width="40sp"
+            android:layout_height="40sp"
             android:layout_gravity="left|center_vertical"
             android:layout_marginStart="20sp"
 
@@ -146,6 +158,18 @@
             android:backgroundTint="@color/whiteTrasparent50"
 
             android:background="@drawable/next_music"/>
+        <ImageButton
+            android:id="@+id/repeatMode_music"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_gravity="left|center_vertical"
+            android:scaleX="-1"
+            android:layout_marginStart="20sp"
+
+            android:onClick="changeRepeatMode"
+
+            android:backgroundTint="@color/whiteTrasparent50"
+            android:background="@drawable/repeat_off"/>
 
 
     </LinearLayout>
