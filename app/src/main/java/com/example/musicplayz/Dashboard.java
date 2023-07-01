@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 
 import android.os.Bundle;
@@ -30,9 +31,10 @@ public class Dashboard extends AppCompatActivity {
 
     SearchView musicSearch;
     RecyclerView musicItemRecyclerView;
-    static ArrayList<String> musicList = new ArrayList<>();
-    static ArrayList<String> musicName = new ArrayList<>();
-    static int position = -1;
+    ArrayList<String> musicList = new ArrayList<>();
+    ArrayList<String> musicName = new ArrayList<>();
+    boolean hasQueryFlag = false;
+    Context context;
 
     final int REQUEST_CODE = 101;
 
@@ -45,6 +47,7 @@ public class Dashboard extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         musicItemRecyclerView = findViewById(R.id.music_item_recyclerView);
         musicSearch = findViewById(R.id.music_searchView);
+        context = this;
         //initialization end
 
 
@@ -100,7 +103,8 @@ public class Dashboard extends AppCompatActivity {
                         Log.d("Debug", "Dashboard: files = " + fileList);
                     }
                 }
-                updateRecyclerView();
+                updateRecyclerView(musicList, musicName);
+                startSearchListener();
             }
             else
                 Log.d("Debug","Dashboard: No music found");
@@ -109,17 +113,59 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
-    @SuppressLint("RestrictedApi")
-    public void updateRecyclerView(){
-        MusicItemRecyclerViewAdapter adapter = new MusicItemRecyclerViewAdapter(this);
+    public void startSearchListener(){
+
+        musicSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if(newText.equals("")){
+                    updateRecyclerView(musicList, musicName);
+                    Log.d("Debug", "Empty");
+                }
+                else {
+                    Log.d("Debug", newText);
+
+                    ArrayList<String> filteredMusicList = new ArrayList<String>();
+                    ArrayList<String> filteredMusicName = new ArrayList<String>();
+                    for (int i = 0; i < musicName.size(); i++) {
+                        if (musicName.get(i).toLowerCase().contains(newText.toLowerCase())) {
+                            filteredMusicName.add(musicName.get(i));
+                            filteredMusicList.add(musicList.get(i));
+                        }
+                    }
+                    display(filteredMusicName);
+                    updateRecyclerView(filteredMusicList, filteredMusicName);
+                }
+
+                return false;
+            }
+        });
+
+    }
+
+    public void updateRecyclerView(ArrayList<String> musicList, ArrayList<String> musicName){
+        display(musicName);
+        MusicItemRecyclerViewAdapter adapter = new MusicItemRecyclerViewAdapter(this, musicList, musicName);
         musicItemRecyclerView.setAdapter(adapter);
-        musicItemRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(this)));
+        musicItemRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+    }
+
+    private void display(ArrayList<String> musicName) {
+        for(String name : musicName)
+            Log.d("Debug", name);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         musicList = new ArrayList<>();
+        musicName = new ArrayList<>();
     }
 
     @Override
@@ -127,6 +173,5 @@ public class Dashboard extends AppCompatActivity {
         super.onDestroy();
         musicList = new ArrayList<>();
         musicName = new ArrayList<>();
-        position = -1;
     }
 }
