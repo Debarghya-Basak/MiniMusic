@@ -29,7 +29,10 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 public class Player extends AppCompatActivity {
 
@@ -45,6 +48,7 @@ public class Player extends AppCompatActivity {
     int shuffleMode = 0;
 
     ArrayList<String> musicList, musicName;
+    ArrayList<String> tempMusicList, tempMusicName;
     int position;
 
     @SuppressLint("RestrictedApi")
@@ -61,7 +65,8 @@ public class Player extends AppCompatActivity {
         musicList = contents.getStringArrayList("musicList");
         musicName = contents.getStringArrayList("musicName");
         position = contents.getInt("position");
-
+        tempMusicList = new ArrayList<>();
+        tempMusicName = new ArrayList<>();
 
         blurBackground = findViewById(R.id.blurBackground);
 
@@ -176,8 +181,10 @@ public class Player extends AppCompatActivity {
         musicPlaying = true;
     }
 
-    public void musicStopFlag(){
+    public void musicStopFlag(boolean flag){
         mediaPlayer.stop();
+        if(flag)
+            mediaPlayer.release();
         musicPlaying = false;
     }
 
@@ -192,13 +199,20 @@ public class Player extends AppCompatActivity {
             public void run() {
                 int currentPosition = 0;
 
-                while(currentPosition < mediaPlayer.getDuration() - 250){
-                    currentPosition = mediaPlayer.getCurrentPosition();
-                    musicSeekbar.setProgress(currentPosition);
-                    musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
-                    SystemClock.sleep(500);
-                    Log.d("Debug","Duration : " + mediaPlayer.getDuration() + ", Progress : "+ mediaPlayer.getCurrentPosition());
+                try {
+                    while (currentPosition < mediaPlayer.getDuration() - 250) {
+                        currentPosition = mediaPlayer.getCurrentPosition();
+                        musicSeekbar.setProgress(currentPosition);
+                        //TODO: set text inside another thread not working properly
+                        try {
+                            musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+                        } catch (Exception e) {
+                        }
+                        SystemClock.sleep(500);
+                        // Log.d("Debug","Duration : " + mediaPlayer.getDuration() + ", Progress : "+ mediaPlayer.getCurrentPosition());
+                    }
                 }
+                catch (Exception e){}
                 Log.d("Debug" , "Song End");
 
             }
@@ -231,7 +245,7 @@ public class Player extends AppCompatActivity {
     }
 
     public void changeToPrevMusic(){
-        musicStopFlag();
+        musicStopFlag(false);
         updatePlayPauseButtonBg();
         position--;
         if(position == -1)
@@ -253,16 +267,15 @@ public class Player extends AppCompatActivity {
 
     public void changeToNextMusic(){
         if(repeatMode == 0){
-            musicStopFlag();
+            musicStopFlag(false);
             updatePlayPauseButtonBg();
             position++;
             if (position == musicList.size()){
                 position--;
-                musicStopFlag();
+                musicStopFlag(false);
                 threadQuit();
                 updateUIMusic();
                 updatePlayPauseButtonBg();
-                updateSeekbarUI();
                 mediaPlayerListener();
             }
             else{
@@ -275,11 +288,9 @@ public class Player extends AppCompatActivity {
                     threadStart();
             }
 
-
-
         }
         else if(repeatMode == 1) {
-            musicStopFlag();
+            musicStopFlag(false);
             updatePlayPauseButtonBg();
             position++;
             if (position == musicList.size())
@@ -295,7 +306,7 @@ public class Player extends AppCompatActivity {
                 threadStart();
         }
         else if(repeatMode == 2){
-            musicStopFlag();
+            musicStopFlag(false);
             updatePlayPauseButtonBg();
             Log.d("Debug",musicName.get(position));
 
@@ -313,6 +324,7 @@ public class Player extends AppCompatActivity {
 
     public void changeToNextMusic(View v){
         changeToNextMusic();
+        Log.d("Debug", "Next button Clicked");
     }
 
     public void playPauseMusic(){
@@ -333,17 +345,65 @@ public class Player extends AppCompatActivity {
        playPauseMusic();
     }
 
+    public void shuffleArrayList(){
+        for(int i = 0;i<musicList.size();i++){
+            int rand = (int) Math.random() * musicList.size();
+            String temp = musicList.get(rand);
+            musicList.set(rand, musicList.get(i));
+            musicList.set(i,temp);
+
+            temp = musicName.get(rand);
+            musicName.set(rand, musicName.get(i));
+            musicName.set(i,temp);
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     public void changeShuffleMode(View v){
         if(shuffleMode == 0){
             shuffleButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.shuffle_on));
             shuffleMode = 1;
+            musicStopFlag(true);
+            threadQuit();
+
+
+            tempMusicList = copyArrayList(musicList);
+            tempMusicName = copyArrayList(musicName);
+            shuffleArrayList();
+
+            display(tempMusicName);
+
+            position = 0;
+            updatePlayPauseButtonBg();
+            updateUIMusic();
+            mediaPlayerListener();
         }
         else{
             shuffleButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.shuffle_off));
             shuffleMode = 0;
+            musicStopFlag(true);
+            threadQuit();
+
+
+            musicList = copyArrayList(tempMusicList);
+            musicName = copyArrayList(tempMusicName);
+
+            display(musicName);
+
+            position = 0;
+            updatePlayPauseButtonBg();
+            updateUIMusic();
+            mediaPlayerListener();
         }
 
+    }
+
+    private ArrayList<String> copyArrayList(ArrayList<String> musicName) {
+        ArrayList<String> temp = new ArrayList<String>();
+        for(String name: musicName)
+            temp.add(name);
+
+        return temp;
     }
 
 
@@ -406,9 +466,14 @@ public class Player extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        musicStopFlag();
+        musicStopFlag(true);
         updatePlayPauseButtonBg();
         threadQuit();
 
+    }
+
+    private void display(ArrayList<String> musicName) {
+        for(String name : musicName)
+            Log.d("Debug", name);
     }
 }
