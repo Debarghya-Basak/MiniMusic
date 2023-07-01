@@ -72,6 +72,7 @@ public class Player extends AppCompatActivity {
 
         mediaPlayerListener();
 
+
         //initialization end
 
     }
@@ -264,7 +265,8 @@ public class Player extends AppCompatActivity {
         else {
             musicStartFlag();
             updatePlayPauseButtonBg();
-            threadStart();
+            if(!threadMusicDisc.looping && musicPlaying)
+                threadStart();
         }
     }
 
