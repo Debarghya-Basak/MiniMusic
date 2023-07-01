@@ -163,7 +163,6 @@
             android:layout_width="30sp"
             android:layout_height="30sp"
             android:layout_gravity="left|center_vertical"
-            android:scaleX="-1"
             android:layout_marginStart="20sp"
 
             android:onClick="changeRepeatMode"

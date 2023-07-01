@@ -37,10 +37,12 @@ public class Player extends AppCompatActivity {
     ImageView blurBackground, musicDisc;
     MediaPlayer mediaPlayer;
     SeekBar musicSeekbar;
-    ImageButton playPauseButton, nextButton, prevButton;
+    ImageButton playPauseButton, nextButton, prevButton, shuffleButton, repeatButton;
     Thread updateSeekbar;
     LooperThreadMusicDisc threadMusicDisc;
     boolean musicPlaying;
+    int repeatMode = 0;
+    int shuffleMode = 0;
 
     ArrayList<String> musicList, musicName;
     int position;
@@ -73,6 +75,8 @@ public class Player extends AppCompatActivity {
         nextButton = findViewById(R.id.nextButton_music);
         prevButton = findViewById(R.id.prevButton_music);
         musicDisc = findViewById(R.id.music_disc);
+        shuffleButton = findViewById(R.id.shuffleMode_music);
+        repeatButton = findViewById(R.id.repeatMode_music);
 
         updateUIMusic();
         musicStartFlag();
@@ -248,21 +252,63 @@ public class Player extends AppCompatActivity {
     }
 
     public void changeToNextMusic(){
-        musicStopFlag();
-        updatePlayPauseButtonBg();
-        position++;
-        if(position == musicList.size())
-            position = 0;
+        if(repeatMode == 0){
+            musicStopFlag();
+            updatePlayPauseButtonBg();
+            position++;
+            if (position == musicList.size()){
+                position--;
+                musicStopFlag();
+                threadQuit();
+                updateUIMusic();
+                updatePlayPauseButtonBg();
+                updateSeekbarUI();
+                mediaPlayerListener();
+            }
+            else{
+                updateUIMusic();
+                musicStartFlag();
+                updatePlayPauseButtonBg();
+                updateSeekbarUI();
+                mediaPlayerListener();
+                if(!threadMusicDisc.looping && musicPlaying)
+                    threadStart();
+            }
 
-        Log.d("Debug",musicName.get(position));
 
-        updateUIMusic();
-        musicStartFlag();
-        updatePlayPauseButtonBg();
-        updateSeekbarUI();
-        mediaPlayerListener();
-        if(!threadMusicDisc.looping && musicPlaying)
-            threadStart();
+
+        }
+        else if(repeatMode == 1) {
+            musicStopFlag();
+            updatePlayPauseButtonBg();
+            position++;
+            if (position == musicList.size())
+                position = 0;
+            Log.d("Debug",musicName.get(position));
+
+            updateUIMusic();
+            musicStartFlag();
+            updatePlayPauseButtonBg();
+            updateSeekbarUI();
+            mediaPlayerListener();
+            if(!threadMusicDisc.looping && musicPlaying)
+                threadStart();
+        }
+        else if(repeatMode == 2){
+            musicStopFlag();
+            updatePlayPauseButtonBg();
+            Log.d("Debug",musicName.get(position));
+
+            updateUIMusic();
+            musicStartFlag();
+            updatePlayPauseButtonBg();
+            updateSeekbarUI();
+            mediaPlayerListener();
+            if(!threadMusicDisc.looping && musicPlaying)
+                threadStart();
+        }
+
+
     }
 
     public void changeToNextMusic(View v){
@@ -285,6 +331,37 @@ public class Player extends AppCompatActivity {
 
     public void playPauseMusic(View v){
        playPauseMusic();
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void changeShuffleMode(View v){
+        if(shuffleMode == 0){
+            shuffleButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.shuffle_on));
+            shuffleMode = 1;
+        }
+        else{
+            shuffleButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.shuffle_off));
+            shuffleMode = 0;
+        }
+
+    }
+
+
+    @SuppressLint("RestrictedApi")
+    public void changeRepeatMode(View v){
+        if(repeatMode == 0){
+            repeatButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.repeat_playlist_on));
+            repeatMode = 1;
+        }
+        else if(repeatMode == 1){
+            repeatButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.repeat_one_on));
+            repeatMode = 2;
+        }
+        else if(repeatMode == 2){
+            repeatButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.repeat_off));
+            repeatMode = 0;
+        }
+
     }
 
     void blurBackgroundImage(){
