@@ -17,15 +17,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Dashboard extends AppCompatActivity {
 
 
+    SearchView musicSearch;
     RecyclerView musicItemRecyclerView;
     static ArrayList<String> musicList = new ArrayList<>();
     static ArrayList<String> musicName = new ArrayList<>();
@@ -41,6 +44,7 @@ public class Dashboard extends AppCompatActivity {
         //initialization
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         musicItemRecyclerView = findViewById(R.id.music_item_recyclerView);
+        musicSearch = findViewById(R.id.music_searchView);
         //initialization end
 
 
@@ -100,6 +104,8 @@ public class Dashboard extends AppCompatActivity {
             }
             else
                 Log.d("Debug","Dashboard: No music found");
+
+            //startSearchView();
 
     }
 
