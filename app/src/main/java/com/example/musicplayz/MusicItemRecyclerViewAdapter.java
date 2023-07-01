@@ -42,6 +42,9 @@ public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItem
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, Player.class);
+                intent.putExtra("musicList", Dashboard.musicList);
+                intent.putExtra("musicName", Dashboard.musicName);
+                intent.putExtra("position", position);
                 Dashboard.position = position;
                 context.startActivity(intent);
             }

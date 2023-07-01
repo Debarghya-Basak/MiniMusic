@@ -8,6 +8,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
@@ -28,9 +29,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class Player extends AppCompatActivity {
 
-    TextView musicName, musicProgressTime, musicEndTime;
+    TextView musicNameShow, musicProgressTime, musicEndTime;
     ImageView blurBackground, musicDisc;
     MediaPlayer mediaPlayer;
     SeekBar musicSeekbar;
@@ -38,6 +41,9 @@ public class Player extends AppCompatActivity {
     Thread updateSeekbar;
     LooperThreadMusicDisc threadMusicDisc;
     boolean musicPlaying;
+
+    ArrayList<String> musicList, musicName;
+    int position;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -48,11 +54,18 @@ public class Player extends AppCompatActivity {
         //initialization
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
+        Intent intent = getIntent();
+        Bundle contents = intent.getExtras();
+        musicList = contents.getStringArrayList("musicList");
+        musicName = contents.getStringArrayList("musicName");
+        position = contents.getInt("position");
+
+
         blurBackground = findViewById(R.id.blurBackground);
 
-        Log.d("Debug", Dashboard.musicList.get(Dashboard.position));
+        Log.d("Debug", musicList.get(position));
 
-        musicName = findViewById(R.id.playing_music_name);
+        musicNameShow = findViewById(R.id.playing_music_name);
         musicProgressTime = findViewById(R.id.music_progressTime);
         musicEndTime = findViewById(R.id.music_endTime);
         musicSeekbar = findViewById(R.id.seekbar_music);
@@ -204,9 +217,9 @@ public class Player extends AppCompatActivity {
     }
 
     public void updateUIMusic(){
-        mediaPlayer = MediaPlayer.create(this, Uri.parse(Dashboard.musicList.get(Dashboard.position)));
-        musicName.setText(Dashboard.musicName.get(Dashboard.position));
-        musicName.setSelected(true);
+        mediaPlayer = MediaPlayer.create(this, Uri.parse(musicList.get(position)));
+        musicNameShow.setText(musicName.get(position));
+        musicNameShow.setSelected(true);
         musicSeekbar.setMax(mediaPlayer.getDuration()-250);
         musicSeekbar.setProgress(0);
         musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
@@ -216,9 +229,9 @@ public class Player extends AppCompatActivity {
     public void changeToPrevMusic(){
         musicStopFlag();
         updatePlayPauseButtonBg();
-        Dashboard.position--;
-        if(Dashboard.position == -1)
-            Dashboard.position = Dashboard.musicList.size()-1;
+        position--;
+        if(position == -1)
+            position = musicList.size()-1;
 
         updateUIMusic();
         musicStartFlag();
@@ -237,11 +250,11 @@ public class Player extends AppCompatActivity {
     public void changeToNextMusic(){
         musicStopFlag();
         updatePlayPauseButtonBg();
-        Dashboard.position++;
-        if(Dashboard.position == Dashboard.musicList.size())
-            Dashboard.position = 0;
+        position++;
+        if(position == musicList.size())
+            position = 0;
 
-        Log.d("Debug",Dashboard.musicName.get(Dashboard.position));
+        Log.d("Debug",musicName.get(position));
 
         updateUIMusic();
         musicStartFlag();
