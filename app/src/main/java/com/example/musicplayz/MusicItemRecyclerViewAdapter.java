@@ -16,11 +16,14 @@ import java.util.ArrayList;
 
 public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItemRecyclerViewAdapter.MyViewHolder> {
 
-
-
     Context context;
-    public MusicItemRecyclerViewAdapter(Context context) {
+
+    ArrayList<String> musicList, musicName;
+
+    public MusicItemRecyclerViewAdapter(Context context, ArrayList<String> musicList, ArrayList<String> musicName) {
         this.context = context;
+        this.musicList = musicList;
+        this.musicName = musicName;
     }
 
     @NonNull
@@ -36,16 +39,15 @@ public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItem
     @Override
     public void onBindViewHolder(@NonNull MusicItemRecyclerViewAdapter.MyViewHolder holder, int position) {
 
-        holder.musicName.setText(Dashboard.musicName.get(position));
+        holder.musicName.setText(musicName.get(position));
 //        holder.musicName.setSelected(true);
         holder.playSongButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, Player.class);
-                intent.putExtra("musicList", Dashboard.musicList);
-                intent.putExtra("musicName", Dashboard.musicName);
+                intent.putExtra("musicList", musicList);
+                intent.putExtra("musicName", musicName);
                 intent.putExtra("position", position);
-                Dashboard.position = position;
                 context.startActivity(intent);
             }
         });
@@ -54,7 +56,7 @@ public class MusicItemRecyclerViewAdapter extends RecyclerView.Adapter<MusicItem
 
     @Override
     public int getItemCount() {
-        return Dashboard.musicName.size();
+        return musicName.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
