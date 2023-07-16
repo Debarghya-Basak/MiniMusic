@@ -6,8 +6,11 @@ import androidx.appcompat.widget.AppCompatDrawableManager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -57,14 +60,12 @@ public class Player extends AppCompatActivity {
         musicList = contents.getStringArrayList("musicList");
         musicName = contents.getStringArrayList("musicName");
         position = contents.getInt("position");
+
         tempMusicList = new ArrayList<>();
         tempMusicName = new ArrayList<>();
 
         blurBackground = findViewById(R.id.blurBackground);
         blurLayout = findViewById(R.id.alteracBlurLayout);
-
-        Log.d("Debug", musicList.get(position));
-
         musicNameShow = findViewById(R.id.playing_music_name);
         musicProgressTime = findViewById(R.id.music_progressTime);
         musicEndTime = findViewById(R.id.music_endTime);
@@ -78,13 +79,12 @@ public class Player extends AppCompatActivity {
 
         updateUIMusic();
         musicStartFlag();
-
         updatePlayPauseButtonBg();
-
+        //TODO: IMAGE APPLIER
+        blurBackground.setImageBitmap(createAlbumArt(musicList.get(position)));
         blurBackgroundImage();
         musicDiscRotateAnimation();
         seekBarFn();
-
         mediaPlayerListener();
 
         //initialization end
@@ -427,6 +427,25 @@ public class Player extends AppCompatActivity {
             blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
         }
 
+    }
+
+    public static Bitmap createAlbumArt(final String filePath) {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(filePath);
+            byte[] embedPic = retriever.getEmbeddedPicture();
+            bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                retriever.release();
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return bitmap;
     }
 
     public void threadQuit(){

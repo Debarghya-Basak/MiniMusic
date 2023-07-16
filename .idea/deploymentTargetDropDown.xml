@@ -7,12 +7,12 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="E:\APPS\AndroidEmulator\My_Phone_10_API_29.avd" />
+            <value value="E:\APPS\AndroidEmulator\New_Device_API_33.avd" />
           </Key>
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-07-16T17:11:59.831857800Z" />
+    <timeTargetWasSelectedWithDropDown value="2023-07-16T17:45:06.316086200Z" />
     <multipleDevicesSelectedInDropDown value="true" />
     <runningDeviceTargetsSelectedWithDialog>
       <Target>
@@ -29,16 +29,7 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="E:\APPS\AndroidEmulator\My_Phone_API_28.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-      <Target>
-        <type value="RUNNING_DEVICE_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="E:\APPS\AndroidEmulator\My_Phone_10_API_29.avd" />
+            <value value="E:\APPS\AndroidEmulator\New_Device_API_33.avd" />
           </Key>
         </deviceKey>
       </Target>
