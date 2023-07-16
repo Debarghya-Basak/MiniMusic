@@ -1,25 +1,18 @@
 package com.example.musicplayz;
-import static android.graphics.Color.argb;
 
+import static android.graphics.Color.argb;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatDrawableManager;
-import androidx.dynamicanimation.animation.DynamicAnimation;
-import androidx.dynamicanimation.animation.SpringAnimation;
-
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
-
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -28,16 +21,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+
+import io.alterac.blurkit.BlurLayout;
 
 public class Player extends AppCompatActivity {
 
     TextView musicNameShow, musicProgressTime, musicEndTime;
     ImageView blurBackground, musicDisc;
+    BlurLayout blurLayout;
     MediaPlayer mediaPlayer;
     SeekBar musicSeekbar;
     ImageButton playPauseButton, nextButton, prevButton, shuffleButton, repeatButton;
@@ -69,6 +61,7 @@ public class Player extends AppCompatActivity {
         tempMusicName = new ArrayList<>();
 
         blurBackground = findViewById(R.id.blurBackground);
+        blurLayout = findViewById(R.id.alteracBlurLayout);
 
         Log.d("Debug", musicList.get(position));
 
@@ -431,7 +424,7 @@ public class Player extends AppCompatActivity {
 
     void blurBackgroundImage(){
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S)
             blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
 
     }
@@ -463,6 +456,20 @@ public class Player extends AppCompatActivity {
             musicDiscRotateAnimation();
         }
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
+            blurLayout.startBlur();
+    }
+
+    @Override
+    protected void onStop() {
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
+            blurLayout.pauseBlur();
+        super.onStop();
     }
 
     @Override

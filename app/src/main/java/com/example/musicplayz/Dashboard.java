@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -42,7 +43,7 @@ public class Dashboard extends AppCompatActivity {
     Context context;
     ImageButton refresh;
     TextView refreshStatusText;
-    final int REQUEST_CODE = 101;
+    final int REQUEST_CODE_TIRAMISU = 101, REQUEST_CODE = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +64,28 @@ public class Dashboard extends AppCompatActivity {
     }
 
     public void checkPerm(){
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            loadMusicListFromDirectoryThread();
-        }
-        else {
-            ActivityCompat.requestPermissions(Dashboard.this, new String[] { Manifest.permission.READ_MEDIA_AUDIO }, REQUEST_CODE);
 
-            Log.d("Debug","Dashboard : Permission not granted");
-            Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
+        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                loadMusicListFromDirectoryThread();
+            }
+            else {
+                ActivityCompat.requestPermissions(Dashboard.this, new String[] { Manifest.permission.READ_MEDIA_AUDIO }, REQUEST_CODE_TIRAMISU);
+
+                Log.d("Debug","Dashboard : Permission not granted > android 10");
+                Toast.makeText(this, "Permission not granted > android 10", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else{
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                loadMusicListFromDirectoryThread();
+            }
+            else {
+                ActivityCompat.requestPermissions(Dashboard.this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_CODE);
+
+                Log.d("Debug","Dashboard : Permission not granted < android 10");
+                Toast.makeText(this, "Permission not granted < android 10", Toast.LENGTH_SHORT).show();
+            }
         }
 
     }
@@ -79,10 +94,19 @@ public class Dashboard extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
-            case REQUEST_CODE:
+            case REQUEST_CODE_TIRAMISU:
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(context, "Media Audio permission granted", Toast.LENGTH_SHORT).show();
                     loadMusicListFromDirectoryThread();
                 }
+                break;
+
+            case REQUEST_CODE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(context, "External storage permission granted", Toast.LENGTH_SHORT).show();
+                    loadMusicListFromDirectoryThread();
+                }
+                break;
         }
 
     }
@@ -169,6 +193,9 @@ public class Dashboard extends AppCompatActivity {
                 });
             }
 
+        }
+        else{
+            Log.d("Debug","No files found");
         }
 
 

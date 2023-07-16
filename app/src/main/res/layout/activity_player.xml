@@ -7,6 +7,8 @@
     tools:context=".Player">
 
 
+
+
     <ImageView
         android:id="@+id/blurBackground"
         android:layout_width="match_parent"
@@ -17,6 +19,19 @@
         app:layout_constraintTop_toTopOf="parent"
 
         android:background="@drawable/background"/>
+
+    <io.alterac.blurkit.BlurLayout
+        android:id="@+id/alteracBlurLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:blk_blurRadius="5"
+        app:blk_downscaleFactor="0.12"
+        app:blk_fps="0" />
 
 
     <ImageView
