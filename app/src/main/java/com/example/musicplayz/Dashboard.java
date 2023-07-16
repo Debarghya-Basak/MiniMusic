@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.SearchView;
@@ -36,7 +37,8 @@ public class Dashboard extends AppCompatActivity {
     RecyclerView musicItemRecyclerView;
     ArrayList<String> musicList = new ArrayList<>();
     ArrayList<String> musicName = new ArrayList<>();
-    boolean searchStatusFlag = false;
+    boolean searchedOnceFlag = false;
+    boolean searchingStatusFlag = false;
     Context context;
     ImageButton refresh;
     TextView refreshStatusText;
@@ -86,10 +88,21 @@ public class Dashboard extends AppCompatActivity {
     }
 
     public void loadMusicListFromDirectoryThread(){
+
         Thread search = new Thread() {
             @Override
             public void run() {
                 try {
+                    Dashboard.this.runOnUiThread(new Runnable() {
+                        public void run() {
+
+                            refreshStatusText.setText("Refreshing music... Please Wait");
+
+                        }
+                    });
+
+                    searchingStatusFlag = true;
+
                     loadMusicListFromDirectory(Environment.getExternalStorageDirectory().toString(), 0);
                 }
                 catch (IOException e){}
@@ -98,12 +111,13 @@ public class Dashboard extends AppCompatActivity {
 
         search.start();
 
-        startSearchListener();
+        if(!searchedOnceFlag) {
+            searchedOnceFlag = true;
+            startSearchListener();
+        }
     }
 
     public void loadMusicListFromDirectory(String path,long recCounter) throws IOException{
-
-        searchStatusFlag = true;
 
         File directory = new File(path);
         File files[] = directory.listFiles();
@@ -114,10 +128,13 @@ public class Dashboard extends AppCompatActivity {
                 String fileList = files[i].getAbsolutePath();
                 String fileName = files[i].getName();
                 if(fileList.endsWith(".mp3") || fileList.endsWith(".m4a")){
-                    containsMusicFlag = true;
-                    musicList.add(fileList);
-                    musicName.add(fileName);
-                    Log.d("Debug", "Dashboard: files = " + fileList);
+
+                    if(!musicList.contains(fileList)) {
+                        containsMusicFlag = true;
+                        musicList.add(fileList);
+                        musicName.add(fileName);
+                        Log.d("Debug", "Dashboard: files = " + fileList);
+                    }
                 }
             }
 
@@ -134,44 +151,33 @@ public class Dashboard extends AppCompatActivity {
 
             for (int i = 0; i < files.length; ++i){
                 if(files[i].isDirectory() && !files[i].isHidden()) {
-                    loadMusicListFromDirectory(files[i].getAbsolutePath(), recCounter++);
+                    loadMusicListFromDirectory(files[i].getAbsolutePath(), recCounter+1);
                 }
+            }
+
+            Log.d("DebugRec", recCounter+"");
+            if(recCounter == 0l) {
+                Log.d("DebugRec", "End of recursion");
+
+                searchingStatusFlag = false;
+                Dashboard.this.runOnUiThread(new Runnable() {
+                    public void run() {
+
+                        refreshStatusText.setText("Refresh music");
+
+                    }
+                });
             }
 
         }
 
-        if(recCounter == 0l) {
-            searchStatusFlag = false;
-            Log.d("Debug", "End of recursion");
-        }
+
     }
 
-//    public void loadMusicListFromDirectory() throws IOException {
-//
-//            String path = Environment.getExternalStorageDirectory().toString()+"/Music";
-//
-//            File directory = new File(path);
-//            File files[] = directory.listFiles();
-//
-//            if (files != null) {
-//                for (int i = 0; i < files.length; ++i){
-//                    String fileList = files[i].getAbsolutePath();
-//                    String fileName = files[i].getName();
-//                    if(fileList.endsWith(".mp3")){
-//                        musicList.add(fileList);
-//                        musicName.add(fileName);
-//                        Log.d("Debug", "Dashboard: files = " + fileList);
-//                    }
-//                }
-//                updateRecyclerView(musicList, musicName);
-//                startSearchListener();
-//            }
-//            else
-//                Log.d("Debug","Dashboard: No music found");
-//
-//            //startSearchView();
-//
-//    }
+    public void refreshMusic(View v){
+        if(!searchingStatusFlag)
+            loadMusicListFromDirectoryThread();
+    }
 
     public void startSearchListener(){
 

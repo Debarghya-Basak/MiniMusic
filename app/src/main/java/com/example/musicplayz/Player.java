@@ -204,10 +204,15 @@ public class Player extends AppCompatActivity {
                         currentPosition = mediaPlayer.getCurrentPosition();
                         musicSeekbar.setProgress(currentPosition);
                         //TODO: set text inside another thread not working properly
-                        try {
-                            musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
-                        } catch (Exception e) {
-                        }
+                        Player.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+                                }catch (Exception e){}
+                            }
+                        });
+
                         SystemClock.sleep(500);
                         // Log.d("Debug","Duration : " + mediaPlayer.getDuration() + ", Progress : "+ mediaPlayer.getCurrentPosition());
                     }

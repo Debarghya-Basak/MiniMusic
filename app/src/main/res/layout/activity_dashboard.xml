@@ -30,6 +30,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/music_item_recyclerView"
 
+        android:onClick="refreshMusic"
+
         android:src="@drawable/refresh_button"
         />
 
