@@ -187,6 +187,7 @@ public class Dashboard extends AppCompatActivity {
                 Dashboard.this.runOnUiThread(new Runnable() {
                     public void run() {
 
+                        Toast.makeText(context, "Search Complete", Toast.LENGTH_SHORT).show();
                         refreshStatusText.setText("Refresh music");
 
                     }
