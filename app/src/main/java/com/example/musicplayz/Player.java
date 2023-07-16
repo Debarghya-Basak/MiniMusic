@@ -21,8 +21,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import java.util.ArrayList;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import io.alterac.blurkit.BlurLayout;
 
 public class Player extends AppCompatActivity {
@@ -38,7 +39,6 @@ public class Player extends AppCompatActivity {
     boolean musicPlaying;
     int repeatMode = 0;
     int shuffleMode = 0;
-
     ArrayList<String> musicList, musicName;
     ArrayList<String> tempMusicList, tempMusicName;
     int position;
@@ -86,7 +86,6 @@ public class Player extends AppCompatActivity {
         seekBarFn();
 
         mediaPlayerListener();
-
 
         //initialization end
 
@@ -404,7 +403,6 @@ public class Player extends AppCompatActivity {
         return temp;
     }
 
-
     @SuppressLint("RestrictedApi")
     public void changeRepeatMode(View v){
         if(repeatMode == 0){
@@ -424,8 +422,10 @@ public class Player extends AppCompatActivity {
 
     void blurBackgroundImage(){
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
+            Toast.makeText(this, "Above android S", Toast.LENGTH_SHORT).show();
             blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
+        }
 
     }
 
@@ -461,13 +461,13 @@ public class Player extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
+        if(Build.VERSION.SDK_INT <= 31)
             blurLayout.startBlur();
     }
 
     @Override
     protected void onStop() {
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
+        if(Build.VERSION.SDK_INT <= 31)
             blurLayout.pauseBlur();
         super.onStop();
     }
