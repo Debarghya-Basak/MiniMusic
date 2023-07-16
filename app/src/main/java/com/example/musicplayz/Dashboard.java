@@ -16,10 +16,15 @@ import android.content.pm.PackageManager;
 
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,15 +32,14 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Dashboard extends AppCompatActivity {
-
-
     SearchView musicSearch;
     RecyclerView musicItemRecyclerView;
     ArrayList<String> musicList = new ArrayList<>();
     ArrayList<String> musicName = new ArrayList<>();
-    boolean hasQueryFlag = false;
+    boolean searchStatusFlag = false;
     Context context;
-
+    ImageButton refresh;
+    TextView refreshStatusText;
     final int REQUEST_CODE = 101;
 
     @Override
@@ -48,8 +52,9 @@ public class Dashboard extends AppCompatActivity {
         musicItemRecyclerView = findViewById(R.id.music_item_recyclerView);
         musicSearch = findViewById(R.id.music_searchView);
         context = this;
+        refresh = (ImageButton) findViewById(R.id.music_refresh) ;
+        refreshStatusText = (TextView) findViewById(R.id.refresh_status_textView);
         //initialization end
-
 
         checkPerm();
 
@@ -57,10 +62,7 @@ public class Dashboard extends AppCompatActivity {
 
     public void checkPerm(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            try {
-                loadMusicListFromDirectory();
-            } catch (IOException e) {
-            }
+            loadMusicListFromDirectoryThread();
         }
         else {
             ActivityCompat.requestPermissions(Dashboard.this, new String[] { Manifest.permission.READ_MEDIA_AUDIO }, REQUEST_CODE);
@@ -77,41 +79,99 @@ public class Dashboard extends AppCompatActivity {
         switch (requestCode){
             case REQUEST_CODE:
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    try {
-                        loadMusicListFromDirectory();
-                    } catch (IOException e) {
-                    }
+                    loadMusicListFromDirectoryThread();
                 }
         }
 
     }
 
-    public void loadMusicListFromDirectory() throws IOException {
-
-            String path = Environment.getExternalStorageDirectory().toString()+"/Music";
-
-            File directory = new File(path);
-            File files[] = directory.listFiles();
-
-            if (files != null) {
-                for (int i = 0; i < files.length; ++i){
-                    String fileList = files[i].getAbsolutePath();
-                    String fileName = files[i].getName();
-                    if(fileList.endsWith(".mp3")){
-                        musicList.add(fileList);
-                        musicName.add(fileName);
-                        Log.d("Debug", "Dashboard: files = " + fileList);
-                    }
+    public void loadMusicListFromDirectoryThread(){
+        Thread search = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    loadMusicListFromDirectory(Environment.getExternalStorageDirectory().toString(), 0);
                 }
-                updateRecyclerView(musicList, musicName);
-                startSearchListener();
+                catch (IOException e){}
             }
-            else
-                Log.d("Debug","Dashboard: No music found");
+        };
 
-            //startSearchView();
+        search.start();
 
+        startSearchListener();
     }
+
+    public void loadMusicListFromDirectory(String path,long recCounter) throws IOException{
+
+        searchStatusFlag = true;
+
+        File directory = new File(path);
+        File files[] = directory.listFiles();
+
+        if(files != null){
+            boolean containsMusicFlag = false;
+            for (int i = 0; i < files.length; ++i){
+                String fileList = files[i].getAbsolutePath();
+                String fileName = files[i].getName();
+                if(fileList.endsWith(".mp3") || fileList.endsWith(".m4a")){
+                    containsMusicFlag = true;
+                    musicList.add(fileList);
+                    musicName.add(fileName);
+                    Log.d("Debug", "Dashboard: files = " + fileList);
+                }
+            }
+
+            if(containsMusicFlag) {
+                Dashboard.this.runOnUiThread(new Runnable() {
+                    public void run() {
+
+                        updateRecyclerView(musicList, musicName);
+
+                    }
+                });
+            }
+
+
+            for (int i = 0; i < files.length; ++i){
+                if(files[i].isDirectory() && !files[i].isHidden()) {
+                    loadMusicListFromDirectory(files[i].getAbsolutePath(), recCounter++);
+                }
+            }
+
+        }
+
+        if(recCounter == 0l) {
+            searchStatusFlag = false;
+            Log.d("Debug", "End of recursion");
+        }
+    }
+
+//    public void loadMusicListFromDirectory() throws IOException {
+//
+//            String path = Environment.getExternalStorageDirectory().toString()+"/Music";
+//
+//            File directory = new File(path);
+//            File files[] = directory.listFiles();
+//
+//            if (files != null) {
+//                for (int i = 0; i < files.length; ++i){
+//                    String fileList = files[i].getAbsolutePath();
+//                    String fileName = files[i].getName();
+//                    if(fileList.endsWith(".mp3")){
+//                        musicList.add(fileList);
+//                        musicName.add(fileName);
+//                        Log.d("Debug", "Dashboard: files = " + fileList);
+//                    }
+//                }
+//                updateRecyclerView(musicList, musicName);
+//                startSearchListener();
+//            }
+//            else
+//                Log.d("Debug","Dashboard: No music found");
+//
+//            //startSearchView();
+//
+//    }
 
     public void startSearchListener(){
 

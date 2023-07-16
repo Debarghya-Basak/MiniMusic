@@ -429,8 +429,6 @@ public class Player extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
 
-
-
     }
 
     public void threadQuit(){
