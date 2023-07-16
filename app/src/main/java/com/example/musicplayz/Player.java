@@ -461,13 +461,13 @@ public class Player extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(Build.VERSION.SDK_INT <= 31)
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
             blurLayout.startBlur();
     }
 
     @Override
     protected void onStop() {
-        if(Build.VERSION.SDK_INT <= 31)
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
             blurLayout.pauseBlur();
         super.onStop();
     }
