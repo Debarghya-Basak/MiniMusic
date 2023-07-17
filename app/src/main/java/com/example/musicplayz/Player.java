@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -27,13 +30,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import io.alterac.blurkit.BlurKit;
 import io.alterac.blurkit.BlurLayout;
 
 public class Player extends AppCompatActivity {
 
     TextView musicNameShow, musicProgressTime, musicEndTime;
-    ImageView blurBackground, musicDisc;
-    BlurLayout blurLayout;
+    static ImageView blurBackground;
+    ImageView musicDisc;
     MediaPlayer mediaPlayer;
     SeekBar musicSeekbar;
     ImageButton playPauseButton, nextButton, prevButton, shuffleButton, repeatButton;
@@ -63,9 +68,9 @@ public class Player extends AppCompatActivity {
 
         tempMusicList = new ArrayList<>();
         tempMusicName = new ArrayList<>();
+        BlurKit.init(this);
 
         blurBackground = findViewById(R.id.blurBackground);
-        blurLayout = findViewById(R.id.alteracBlurLayout);
         musicNameShow = findViewById(R.id.playing_music_name);
         musicProgressTime = findViewById(R.id.music_progressTime);
         musicEndTime = findViewById(R.id.music_endTime);
@@ -80,9 +85,7 @@ public class Player extends AppCompatActivity {
         updateUIMusic();
         musicStartFlag();
         updatePlayPauseButtonBg();
-        //TODO: IMAGE APPLIER
-        blurBackground.setImageBitmap(createAlbumArt(musicList.get(position)));
-        blurBackgroundImage();
+        updateBackground();
         musicDiscRotateAnimation();
         seekBarFn();
         mediaPlayerListener();
@@ -249,6 +252,7 @@ public class Player extends AppCompatActivity {
             position = musicList.size()-1;
 
         updateUIMusic();
+        updateBackground();
         musicStartFlag();
         updatePlayPauseButtonBg();
         updateSeekbarUI();
@@ -272,12 +276,14 @@ public class Player extends AppCompatActivity {
                 musicStopFlag(false);
                 threadQuit();
                 updateUIMusic();
+                updateBackground();
                 updatePlayPauseButtonBg();
                 mediaPlayerListener();
             }
             else{
                 updateUIMusic();
                 musicStartFlag();
+                updateBackground();
                 updatePlayPauseButtonBg();
                 updateSeekbarUI();
                 mediaPlayerListener();
@@ -295,6 +301,7 @@ public class Player extends AppCompatActivity {
             Log.d("Debug",musicName.get(position));
 
             updateUIMusic();
+            updateBackground();
             musicStartFlag();
             updatePlayPauseButtonBg();
             updateSeekbarUI();
@@ -308,6 +315,7 @@ public class Player extends AppCompatActivity {
             Log.d("Debug",musicName.get(position));
 
             updateUIMusic();
+            updateBackground();
             musicStartFlag();
             updatePlayPauseButtonBg();
             updateSeekbarUI();
@@ -373,6 +381,7 @@ public class Player extends AppCompatActivity {
             position = 0;
             updatePlayPauseButtonBg();
             updateUIMusic();
+            updateBackground();
             mediaPlayerListener();
         }
         else{
@@ -390,6 +399,7 @@ public class Player extends AppCompatActivity {
             position = 0;
             updatePlayPauseButtonBg();
             updateUIMusic();
+            updateBackground();
             mediaPlayerListener();
         }
 
@@ -420,23 +430,29 @@ public class Player extends AppCompatActivity {
 
     }
 
-    void blurBackgroundImage(){
+    private void updateBackground() {
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
-            Toast.makeText(this, "Above android S", Toast.LENGTH_SHORT).show();
-            blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
+//        blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
+        try {
+            blurBackground.setImageBitmap(BlurKit.getInstance().blur(createAlbumArt(musicList.get(position)), 10));
+        }catch (Exception e){
+            Bitmap placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.background);
+            blurBackground.setImageBitmap(BlurKit.getInstance().blur(placeholder,10));
         }
+
 
     }
 
-    public static Bitmap createAlbumArt(final String filePath) {
+    public Bitmap createAlbumArt(String filePath) {
         Bitmap bitmap = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(filePath);
             byte[] embedPic = retriever.getEmbeddedPicture();
             bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
+            Log.d("Debug", "Found album art");
         } catch (Exception e) {
+            Log.d("Debug", "Cannot find album art");
             e.printStackTrace();
         } finally {
             try {
@@ -445,6 +461,24 @@ public class Player extends AppCompatActivity {
                 e2.printStackTrace();
             }
         }
+        return bitmap;
+    }
+
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 1;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 1;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
         return bitmap;
     }
 
@@ -477,19 +511,6 @@ public class Player extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
-            blurLayout.startBlur();
-    }
-
-    @Override
-    protected void onStop() {
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S)
-            blurLayout.pauseBlur();
-        super.onStop();
-    }
 
     @Override
     protected void onDestroy() {
