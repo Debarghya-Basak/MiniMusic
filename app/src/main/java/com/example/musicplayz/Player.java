@@ -3,6 +3,9 @@ package com.example.musicplayz;
 import static android.graphics.Color.argb;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatDrawableManager;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -19,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +49,7 @@ public class Player extends AppCompatActivity {
     Thread updateSeekbar;
     LooperThreadMusicDisc threadMusicDisc;
     boolean musicPlaying;
+    boolean firstMusic;
     int repeatMode = 0;
     int shuffleMode = 0;
     ArrayList<String> musicList, musicName;
@@ -69,6 +74,7 @@ public class Player extends AppCompatActivity {
         tempMusicList = new ArrayList<>();
         tempMusicName = new ArrayList<>();
         BlurKit.init(this);
+        firstMusic = true;
 
         blurBackground = findViewById(R.id.blurBackground);
         musicNameShow = findViewById(R.id.playing_music_name);
@@ -85,10 +91,10 @@ public class Player extends AppCompatActivity {
         updateUIMusic();
         musicStartFlag();
         updatePlayPauseButtonBg();
-        updateBackground();
         musicDiscRotateAnimation();
         seekBarFn();
         mediaPlayerListener();
+        updateBackground();
 
         //initialization end
 
@@ -154,7 +160,6 @@ public class Player extends AppCompatActivity {
             @Override
             public void run() {
                 do{
-
                     //if animate() is looped, it cannot run directly on a simple Thread. It needs a Looper Thread
                     musicDisc.animate().rotationBy(100).setDuration(5000);
                     musicDisc.setHasTransientState(true);
@@ -192,24 +197,25 @@ public class Player extends AppCompatActivity {
         updateSeekbar = new Thread(){
             @Override
             public void run() {
+                setName("SeekBarUIThread");
                 int currentPosition = 0;
 
                 try {
                     while (currentPosition < mediaPlayer.getDuration() - 250) {
                         currentPosition = mediaPlayer.getCurrentPosition();
-                        musicSeekbar.setProgress(currentPosition);
-                        //TODO: set text inside another thread not working properly
+                        //TODO: set text inside another thread does not work properly
+                        int finalCurrentPosition = currentPosition;
                         Player.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                try {
-                                    musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
-                                }catch (Exception e){}
+                                musicSeekbar.setProgress(finalCurrentPosition);
+                                musicProgressTime.setText(toMin(mediaPlayer.getCurrentPosition()));
+
                             }
                         });
 
                         SystemClock.sleep(500);
-                        // Log.d("Debug","Duration : " + mediaPlayer.getDuration() + ", Progress : "+ mediaPlayer.getCurrentPosition());
+                        Log.d("Debug","Duration : " + mediaPlayer.getDuration() + ", Progress : "+ mediaPlayer.getCurrentPosition());
                     }
                 }
                 catch (Exception e){}
@@ -252,11 +258,11 @@ public class Player extends AppCompatActivity {
             position = musicList.size()-1;
 
         updateUIMusic();
-        updateBackground();
         musicStartFlag();
         updatePlayPauseButtonBg();
-        updateSeekbarUI();
+//        updateSeekbarUI();
         mediaPlayerListener();
+        updateBackground();
         if(!threadMusicDisc.looping && musicPlaying)
             threadStart();
     }
@@ -276,17 +282,17 @@ public class Player extends AppCompatActivity {
                 musicStopFlag(false);
                 threadQuit();
                 updateUIMusic();
-                updateBackground();
                 updatePlayPauseButtonBg();
                 mediaPlayerListener();
+                updateBackground();
             }
             else{
                 updateUIMusic();
                 musicStartFlag();
-                updateBackground();
                 updatePlayPauseButtonBg();
-                updateSeekbarUI();
+//                updateSeekbarUI();
                 mediaPlayerListener();
+                updateBackground();
                 if(!threadMusicDisc.looping && musicPlaying)
                     threadStart();
             }
@@ -301,11 +307,11 @@ public class Player extends AppCompatActivity {
             Log.d("Debug",musicName.get(position));
 
             updateUIMusic();
-            updateBackground();
             musicStartFlag();
             updatePlayPauseButtonBg();
-            updateSeekbarUI();
+//            updateSeekbarUI();
             mediaPlayerListener();
+            updateBackground();
             if(!threadMusicDisc.looping && musicPlaying)
                 threadStart();
         }
@@ -315,11 +321,11 @@ public class Player extends AppCompatActivity {
             Log.d("Debug",musicName.get(position));
 
             updateUIMusic();
-            updateBackground();
             musicStartFlag();
             updatePlayPauseButtonBg();
-            updateSeekbarUI();
+//            updateSeekbarUI();
             mediaPlayerListener();
+            updateBackground();
             if(!threadMusicDisc.looping && musicPlaying)
                 threadStart();
         }
@@ -381,8 +387,8 @@ public class Player extends AppCompatActivity {
             position = 0;
             updatePlayPauseButtonBg();
             updateUIMusic();
-            updateBackground();
             mediaPlayerListener();
+            updateBackground();
         }
         else{
             shuffleButton.setBackground(AppCompatDrawableManager.get().getDrawable(this, R.drawable.shuffle_off));
@@ -399,8 +405,8 @@ public class Player extends AppCompatActivity {
             position = 0;
             updatePlayPauseButtonBg();
             updateUIMusic();
-            updateBackground();
             mediaPlayerListener();
+            updateBackground();
         }
 
     }
@@ -430,16 +436,85 @@ public class Player extends AppCompatActivity {
 
     }
 
+//    private void updateBackgroundThread(){
+//
+//        LooperThreadMusicDisc looperThreadMusicDisc = new LooperThreadMusicDisc();
+//        looperThreadMusicDisc.start();
+//        SystemClock.sleep(200);
+//
+//        Handler handler = new Handler(looperThreadMusicDisc.looper);
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(firstMusic) {
+//                    Player.this.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                blurBackground.setImageBitmap(BlurKit.getInstance().blur(createAlbumArt(musicList.get(position)), 10));
+//                            } catch (Exception e) {
+//                                Bitmap placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.background);
+//                                blurBackground.setImageBitmap(BlurKit.getInstance().blur(placeholder, 10));
+//                            }
+//                        }
+//                    });
+//
+//                    blurBackground.animate().alpha(1).setDuration(1000).start();
+//
+//                    firstMusic = false;
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            looperThreadMusicDisc.looper.quit();
+//                        }
+//                    },1000);
+//
+//                }
+//                else{
+//                    blurBackground.animate().alpha(0).setDuration(1000).setListener(new AnimatorListenerAdapter() {
+//                        @Override
+//                        public void onAnimationEnd(Animator animation) {
+//                            super.onAnimationEnd(animation);
+//
+//                            Player.this.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        blurBackground.setImageBitmap(BlurKit.getInstance().blur(createAlbumArt(musicList.get(position)), 10));
+//                                    } catch (Exception e) {
+//                                        Bitmap placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.background);
+//                                        blurBackground.setImageBitmap(BlurKit.getInstance().blur(placeholder, 10));
+//                                    }
+//                                }
+//                            });
+//
+//
+//                            blurBackground.animate().alpha(1).setDuration(2000).start();
+//                        }
+//                    }).start();
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            looperThreadMusicDisc.looper.quit();
+//                        }
+//                    },3000);
+//                }
+//
+//            }
+//        },100);
+//
+//
+//    }
+
     private void updateBackground() {
 
 //        blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
         try {
             blurBackground.setImageBitmap(BlurKit.getInstance().blur(createAlbumArt(musicList.get(position)), 10));
-        }catch (Exception e){
+        } catch (Exception e) {
             Bitmap placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.background);
-            blurBackground.setImageBitmap(BlurKit.getInstance().blur(placeholder,10));
+            blurBackground.setImageBitmap(BlurKit.getInstance().blur(placeholder, 10));
         }
-
 
     }
 

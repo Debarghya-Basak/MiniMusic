@@ -13,6 +13,7 @@ public class LooperThreadMusicDisc extends Thread{
 
     @Override
     public void run(){
+        setName("MusicRotationAndBackgroundThread");
         Looper.prepare();
         looper = Looper.myLooper();
         handler = new Handler();

@@ -23,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
         splashScreenIcon.animate().scaleX(2).scaleY(2).rotationBy(90f).setDuration(1000);
 
-        new Handler().postDelayed(new Runnable() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 startDashboardPage();

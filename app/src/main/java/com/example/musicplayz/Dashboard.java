@@ -106,6 +106,7 @@ public class Dashboard extends AppCompatActivity {
         Thread search = new Thread() {
             @Override
             public void run() {
+                setName("LoadMusicToListThread");
                 try {
                     Dashboard.this.runOnUiThread(new Runnable() {
                         public void run() {
