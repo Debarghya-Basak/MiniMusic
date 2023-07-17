@@ -35,5 +35,6 @@ public class MainActivity extends AppCompatActivity {
     public void startDashboardPage(){
         Intent intent = new Intent(MainActivity.this, Dashboard.class);
         startActivity(intent);
+        finish();
     }
 }
