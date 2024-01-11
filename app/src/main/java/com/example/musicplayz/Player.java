@@ -34,9 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-
 import io.alterac.blurkit.BlurKit;
 import io.alterac.blurkit.BlurLayout;
+
 
 public class Player extends AppCompatActivity {
 
@@ -509,6 +509,7 @@ public class Player extends AppCompatActivity {
     private void updateBackground() {
 
 //        blurBackground.setRenderEffect(RenderEffect.createBlurEffect(50, 50, Shader.TileMode.MIRROR));
+
         try {
             blurBackground.setImageBitmap(BlurKit.getInstance().blur(createAlbumArt(musicList.get(position)), 10));
         } catch (Exception e) {
